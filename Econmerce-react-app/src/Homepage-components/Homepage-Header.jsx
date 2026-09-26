@@ -1,6 +1,11 @@
 import './Homepage-Header.css';
 
 export function Heading({ CartItems }) {
+  let cartIconQuantity = 0;
+  CartItems.forEach((CartItem) => {
+    cartIconQuantity += CartItem.quantity;
+  });
+
   return (
     <>
       <header className="heading">
@@ -30,7 +35,9 @@ export function Heading({ CartItems }) {
           <a href="./Checkout">
             <img src="images/icons/cart-icon.png" />
             <p className="header-column4-p1">Cart</p>
-            <p className="header-column4-p2 js-header-column4-p2">4</p>
+            <p className="header-column4-p2 js-header-column4-p2">
+              {cartIconQuantity}
+            </p>
           </a>
         </div>
       </header>
