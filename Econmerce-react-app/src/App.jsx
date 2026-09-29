@@ -6,24 +6,37 @@ import { Routes, Route } from 'react-router-dom';
 
 export function App() {
   const [CartItems, setCartItems] = useState([]);
+  async function loadCart() {
+    const response = await axios.get(
+      'http://localhost:3000/api/cart-items?expand=product'
+    );
+    setCartItems(response.data);
+    console.log(response.data);
+  }
+
   useEffect(() => {
-    axios
-      .get('http://localhost:3000/api/cart-items?expand=product')
-      .then((response) => {
-        setCartItems(response.data);
-        console.log(response.data);
-      });
+    loadCart();
   }, []);
   return (
     <>
       <Routes>
         <Route
           index
-          element={<Homepage CartItems={CartItems} />}
+          element={
+            <Homepage
+              LoadCart={loadCart}
+              CartItems={CartItems}
+            />
+          }
         />
         <Route
           path="Checkout"
-          element={<Checkout CartItems={CartItems} />}
+          element={
+            <Checkout
+              LoadCart={loadCart}
+              CartItems={CartItems}
+            />
+          }
         />
       </Routes>
     </>

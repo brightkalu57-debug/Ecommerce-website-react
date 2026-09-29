@@ -1,166 +1,138 @@
 import { CheckoutHeader } from '../Checkout.component/Checkout-header';
+import { PaymentSummary } from '../Checkout.component/paymentsummary-component';
+import { useEffect } from 'react';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import axios from 'axios';
 import './Checkout.css';
 
-export function Checkout({ CartItems }) {
+export function Checkout({ CartItems, LoadCart }) {
+  const [Deliveryoptions, setDeliveryoptions] = useState([]);
+  useEffect(() => {
+    axios
+      .get(
+        'http://localhost:3000/api/delivery-options?expand=estimatedDeliveryTime'
+      )
+      .then((response) => {
+        setDeliveryoptions(response.data);
+      });
+  }, []);
   return (
     <>
       <CheckoutHeader />
+      <main className="checkout-main">
+        <p className="checkout-row1">Review your order</p>
+        <div className="Product-order-parent-div js-Product-order-parent-div">
+          <div className="Products-parent-div">
+            {CartItems.map((CartItem) => {
+              return (
+                <div
+                  key={CartItem.productId}
+                  className="checkout-product-container"
+                >
+                  <p className="checkout-product-container-row1-p1 js-checkout-product-container-row1-p1 ">
+                    Delivery date: Tuesday, October 6
+                  </p>
+                  <div className="checkout-product-container-row2">
+                    <div className="checkout-product-container-row2-column1">
+                      <div className="checkout-product-container-row2-column1-img-div">
+                        <img src={CartItem.product.image} />
+                      </div>
+                      <div className="checkout-product-container-row2-column1-column2">
+                        <p className="checkout-product-container-row2-column1-column2-p1">
+                          {CartItem.product.name}
+                        </p>
+                        <p className="checkout-product-container-row2-column1-column2-p2">
+                          ${(CartItem.product.priceCents / 100).toFixed(2)}
+                        </p>
+                        <p className="checkout-product-container-row2-column1-column2-p3">
+                          Quantity:
+                          <span
+                            className="js-product-Quantity"
+                            data-product-id="${productItems.id}"
+                          >
+                            {CartItem.quantity}
+                          </span>
+                          <span
+                            className="lnk js-cart-Update-lnk"
+                            data-product-id="${productItems.id}"
+                          >
+                            Update
+                          </span>
+                          <span
+                            onClick={async () => {
+                              await axios.delete(
+                                `http://localhost:3000/api/cart-items/${CartItem.productId}`
+                              );
+                              await LoadCart();
+                            }}
+                            className="lnk js-cart-delete-lnk"
+                          >
+                            Delete
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="checkout-product-container-row2-column2">
+                      <p className="checkout-product-container-row2-column1-p1">
+                        Choose a delivery option:
+                      </p>
+                      {Deliveryoptions.map((Deliveryoption) => {
+                        let priceCents;
+                        if (Deliveryoption.priceCents === 0) {
+                          priceCents = ' FREE Shipping';
+                        } else {
+                          priceCents = `$${(
+                            Deliveryoption.priceCents / 100
+                          ).toFixed(2)} - Shipping`;
+                        }
 
-      <div className="Product-order-parent-div js-Product-order-parent-div">
-        <div className="Products-parent-div">
-          {CartItems.map((CartItem) => {
-            return (
-              <div
-                key={CartItem.productId}
-                className="checkout-product-container"
-              >
-                <p className="checkout-product-container-row1-p1 js-checkout-product-container-row1-p1 ">
-                  Tuesday, October 6
-                </p>
-                <div className="checkout-product-container-row2">
-                  <div className="checkout-product-container-row2-column1">
-                    <div className="checkout-product-container-row2-column1-img-div">
-                      <img src={CartItem.product.image} />
+                        return (
+                          <label
+                            key={Deliveryoption.id}
+                            className="checkout-product-container-row2-column2-label1 js-checkout-label"
+                            data-product-id="${cartItems.productId}"
+                          >
+                            <input
+                              className="js-checkout-labelradio"
+                              checked={
+                                Deliveryoption.id === CartItem.deliveryOptionId
+                              }
+                              type="radio"
+                              onChange={async () => {
+                                await axios.put(
+                                  `http://localhost:3000/api/cart-items/${CartItem.productId}`,
+                                  {
+                                    deliveryOptionId: `${Deliveryoption.id}`,
+                                  }
+                                );
+                                await LoadCart();
+                              }}
+                              data-delivery-option-id="1"
+                              name={CartItem.productId}
+                            />
+                            <div className="checkout-product-container-row2-column2-label-p-div">
+                              <p className="checkout-product-container-row2-column2-label-p ">
+                                {dayjs(
+                                  Deliveryoption.estimatedDeliveryTimeMs
+                                ).format('dddd, MMMM D')}
+                              </p>
+                              <p className="checkout-product-container-row2-column2-label-p2">
+                                {priceCents}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })}
                     </div>
-                    <div className="checkout-product-container-row2-column1-column2">
-                      <p className="checkout-product-container-row2-column1-column2-p1">
-                        {CartItem.product.name}
-                      </p>
-                      <p className="checkout-product-container-row2-column1-column2-p2">
-                        ${(CartItem.product.priceCents / 100).toFixed(2)}
-                      </p>
-                      <p className="checkout-product-container-row2-column1-column2-p3">
-                        Quantity:
-                        <span
-                          className="js-product-Quantity"
-                          data-product-id="${productItems.id}"
-                        >
-                          {CartItem.quantity}
-                        </span>
-                        <span
-                          className="lnk js-cart-Update-lnk"
-                          data-product-id="${productItems.id}"
-                        >
-                          Update
-                        </span>
-                        <span
-                          className="lnk js-cart-delete-lnk"
-                          data-product-id="${productItems.id}"
-                        >
-                          Delete
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="checkout-product-container-row2-column2">
-                    <p className="checkout-product-container-row2-column1-p1">
-                      Choose a delivery option:
-                    </p>
-                    <label
-                      className="checkout-product-container-row2-column2-label1 js-checkout-label"
-                      data-product-id="${cartItems.productId}"
-                      data-product-name="FREEShipping"
-                    >
-                      <input
-                        className="js-checkout-labelradio"
-                        type="radio"
-                        data-product-id="${cartItems.productId}"
-                        data-delivery-option-id="1"
-                        name="${cartItems.productId}"
-                      />
-                      <div className="checkout-product-container-row2-column2-label-p-div">
-                        <p className="checkout-product-container-row2-column2-label-p js-checkout-product-container-row2-column2-label-p">
-                          Tuesday, October 6
-                        </p>
-                        <p className="checkout-product-container-row2-column2-label-p2">
-                          {' '}
-                          FREE Shipping
-                        </p>
-                      </div>
-                    </label>
-                    <label
-                      className="checkout-product-container-row2-column2-label2 js-checkout-label"
-                      data-product-id="${cartItems.productId}"
-                      data-product-name="ThreedaysShipping"
-                    >
-                      <input
-                        className="js-checkout-labelradio"
-                        type="radio"
-                        data-product-id="${cartItems.productId}"
-                        data-delivery-option-id="2"
-                        name="${cartItems.productId}"
-                      />
-                      <div className="checkout-product-container-row2-column2-label-p-div">
-                        <p className="checkout-product-container-row2-column2-label-p ">
-                          Wednesday, September 30
-                        </p>
-                        <p className="checkout-product-container-row2-column2-label-p2">
-                          $4.99 - Shipping
-                        </p>
-                      </div>
-                    </label>
-                    <label
-                      className="checkout-product-container-row2-column2-label3 js-checkout-label"
-                      data-product-id="${cartItems.productId}"
-                      data-product-name="onedaysShipping"
-                    >
-                      <input
-                        className="js-checkout-labelradio"
-                        type="radio"
-                        data-product-id="${cartItems.productId}"
-                        data-delivery-option-id="3"
-                        name="${cartItems.productId}"
-                      />
-                      <div className="checkout-product-container-row2-column2-label-p-div">
-                        <p className="checkout-product-container-row2-column2-label-p">
-                          Monday, September 28
-                        </p>
-                        <p className="checkout-product-container-row2-column2-label-p2">
-                          $9.99 - Shipping
-                        </p>
-                      </div>
-                    </label>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          <PaymentSummary CartItems={CartItems} />
         </div>
-
-        <div className="checkoutPlaceorder-container">
-          <p className="checkoutPlaceorder-container-p1">Order Summary</p>
-          <div className="checkoutPlaceorder-container-div1">
-            <p>ItemsQuantity:</p>
-            <p>ItemsPrice</p>
-          </div>
-          <div className="checkoutPlaceorder-container-div2">
-            <p>Shipping & handling:</p>
-            <p className="js-checkoutPlaceorder-container-div2">
-              .addShippingPrices
-            </p>
-          </div>
-          <hr className="checkoutPlaceorder-container-hr1" />
-          <div className="checkoutPlaceorder-container-div3">
-            <p>Total before tax:</p>
-            <p>totalBeforeTax</p>
-          </div>
-          <div className="checkoutPlaceorder-container-div4">
-            <p>Estimated tax (10%):</p>
-            <p>estimatedTax</p>
-          </div>
-          <div className="checkoutPlaceorder-container-div5">
-            <p>Order total:</p>
-            <p>orderTotal</p>
-          </div>
-          <a href="../Amazon html/Amazon-placedorder.html">
-            <div className="checkoutPlaceorder-container-abledbutton-div">
-              <button className="checkoutPlaceorder-container-button js-checkoutPlaceorder-container-button">
-                Place your order
-              </button>
-            </div>
-          </a>
-        </div>
-      </div>
+      </main>
     </>
   );
 }

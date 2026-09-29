@@ -9,8 +9,11 @@ export function CheckoutHeader() {
       </a>
       <p className="header-p1">
         Checkout (
-        <a href="/">
-          <span className="header-p1-span js-header-p1-span"></span>
+        <a
+          className="header-p1-span js-header-p1-span"
+          href="/"
+        >
+          1 items
         </a>
         )
       </p>
