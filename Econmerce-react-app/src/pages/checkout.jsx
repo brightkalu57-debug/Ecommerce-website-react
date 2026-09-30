@@ -1,13 +1,17 @@
 import { CheckoutHeader } from '../Checkout.component/Checkout-header';
 import { PaymentSummary } from '../Checkout.component/paymentsummary-component';
+import { DeliveryOptions } from '../Checkout.component/Delivery-options';
 import { useEffect } from 'react';
-import dayjs from 'dayjs';
 import { useState } from 'react';
+import dayjs from 'dayjs';
 import axios from 'axios';
 import './Checkout.css';
 
 export function Checkout({ CartItems, LoadCart }) {
   const [Deliveryoptions, setDeliveryoptions] = useState([]);
+  const [InputQuantity, setInputQuantity] = useState(1);
+
+  const [Update, setUpdate] = useState('update');
   useEffect(() => {
     axios
       .get(
@@ -25,13 +29,16 @@ export function Checkout({ CartItems, LoadCart }) {
         <div className="Product-order-parent-div js-Product-order-parent-div">
           <div className="Products-parent-div">
             {CartItems.map((CartItem) => {
+              const deliveryDate = Deliveryoptions.find((Deliveryoption) => {
+                return Deliveryoption.id === CartItem.deliveryOptionId;
+              })?.estimatedDeliveryTimeMs;
               return (
                 <div
                   key={CartItem.productId}
                   className="checkout-product-container"
                 >
                   <p className="checkout-product-container-row1-p1 js-checkout-product-container-row1-p1 ">
-                    Delivery date: Tuesday, October 6
+                    Delivery date: {dayjs(deliveryDate).format('dddd, MMMM D')}
                   </p>
                   <div className="checkout-product-container-row2">
                     <div className="checkout-product-container-row2-column1">
@@ -51,13 +58,42 @@ export function Checkout({ CartItems, LoadCart }) {
                             className="js-product-Quantity"
                             data-product-id="${productItems.id}"
                           >
-                            {CartItem.quantity}
+                            {Update === 'update' ? (
+                              CartItem.quantity
+                            ) : (
+                              <label>
+                                <input
+                                  onChange={(event) => {
+                                    setInputQuantity(
+                                      Number(event.target.value)
+                                    );
+                                  }}
+                                  className="product-Quantity-label js-product-Quantity-label"
+                                  value={InputQuantity}
+                                  type="number"
+                                  min="1"
+                                />
+                              </label>
+                            )}
                           </span>
                           <span
                             className="lnk js-cart-Update-lnk"
-                            data-product-id="${productItems.id}"
+                            onClick={async () => {
+                              if (Update === 'update') {
+                                setUpdate('Save');
+                              } else if (Update === 'Save') {
+                                await axios.put(
+                                  `http://localhost:3000/api/cart-items/${CartItem.productId}`,
+                                  {
+                                    quantity: InputQuantity,
+                                  }
+                                );
+                                await LoadCart();
+                                setUpdate('update');
+                              }
+                            }}
                           >
-                            Update
+                            {Update === 'update' ? 'Update' : 'Save'}
                           </span>
                           <span
                             onClick={async () => {
@@ -77,53 +113,11 @@ export function Checkout({ CartItems, LoadCart }) {
                       <p className="checkout-product-container-row2-column1-p1">
                         Choose a delivery option:
                       </p>
-                      {Deliveryoptions.map((Deliveryoption) => {
-                        let priceCents;
-                        if (Deliveryoption.priceCents === 0) {
-                          priceCents = ' FREE Shipping';
-                        } else {
-                          priceCents = `$${(
-                            Deliveryoption.priceCents / 100
-                          ).toFixed(2)} - Shipping`;
-                        }
-
-                        return (
-                          <label
-                            key={Deliveryoption.id}
-                            className="checkout-product-container-row2-column2-label1 js-checkout-label"
-                            data-product-id="${cartItems.productId}"
-                          >
-                            <input
-                              className="js-checkout-labelradio"
-                              checked={
-                                Deliveryoption.id === CartItem.deliveryOptionId
-                              }
-                              type="radio"
-                              onChange={async () => {
-                                await axios.put(
-                                  `http://localhost:3000/api/cart-items/${CartItem.productId}`,
-                                  {
-                                    deliveryOptionId: `${Deliveryoption.id}`,
-                                  }
-                                );
-                                await LoadCart();
-                              }}
-                              data-delivery-option-id="1"
-                              name={CartItem.productId}
-                            />
-                            <div className="checkout-product-container-row2-column2-label-p-div">
-                              <p className="checkout-product-container-row2-column2-label-p ">
-                                {dayjs(
-                                  Deliveryoption.estimatedDeliveryTimeMs
-                                ).format('dddd, MMMM D')}
-                              </p>
-                              <p className="checkout-product-container-row2-column2-label-p2">
-                                {priceCents}
-                              </p>
-                            </div>
-                          </label>
-                        );
-                      })}
+                      <DeliveryOptions
+                        LoadCart={LoadCart}
+                        CartItem={CartItem}
+                        Deliveryoptions={Deliveryoptions}
+                      />
                     </div>
                   </div>
                 </div>
