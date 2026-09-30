@@ -23,7 +23,7 @@ export function Checkout({ CartItems, LoadCart }) {
   }, []);
   return (
     <>
-      <CheckoutHeader />
+      <CheckoutHeader CartItems={CartItems} />
       <main className="checkout-main">
         <p className="checkout-row1">Review your order</p>
         <div className="Product-order-parent-div js-Product-order-parent-div">

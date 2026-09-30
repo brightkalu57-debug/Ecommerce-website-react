@@ -1,4 +1,8 @@
-export function CheckoutHeader() {
+export function CheckoutHeader({ CartItems }) {
+  let checkoutQuantity = 0;
+  CartItems.forEach((CartItem) => {
+    checkoutQuantity += CartItem.quantity;
+  });
   return (
     <header className="checkout-header">
       <a href="/">
@@ -13,7 +17,7 @@ export function CheckoutHeader() {
           className="header-p1-span js-header-p1-span"
           href="/"
         >
-          1 items
+          {checkoutQuantity} items
         </a>
         )
       </p>
