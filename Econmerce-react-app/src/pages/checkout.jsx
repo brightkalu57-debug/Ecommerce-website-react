@@ -1,17 +1,15 @@
 import { CheckoutHeader } from '../Checkout.component/Checkout-header';
 import { PaymentSummary } from '../Checkout.component/paymentsummary-component';
-import { DeliveryOptions } from '../Checkout.component/Delivery-options';
+import { Reset } from './Resestwebsite';
+import { CartProduct } from '../Checkout.component/Cart-Products';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import dayjs from 'dayjs';
 import axios from 'axios';
 import './Checkout.css';
 
-export function Checkout({ CartItems, LoadCart }) {
+export function Checkout({ CartItems, LoadCart, cartIsLoaded }) {
   const [Deliveryoptions, setDeliveryoptions] = useState([]);
-  const [InputQuantity, setInputQuantity] = useState(1);
 
-  const [Update, setUpdate] = useState('update');
   useEffect(() => {
     axios
       .get(
@@ -27,106 +25,71 @@ export function Checkout({ CartItems, LoadCart }) {
       <main className="checkout-main">
         <p className="checkout-row1">Review your order</p>
         <div className="Product-order-parent-div js-Product-order-parent-div">
-          <div className="Products-parent-div">
-            {CartItems.map((CartItem) => {
-              const deliveryDate = Deliveryoptions.find((Deliveryoption) => {
-                return Deliveryoption.id === CartItem.deliveryOptionId;
-              })?.estimatedDeliveryTimeMs;
-              return (
-                <div
-                  key={CartItem.productId}
-                  className="checkout-product-container"
-                >
-                  <p className="checkout-product-container-row1-p1 js-checkout-product-container-row1-p1 ">
-                    Delivery date: {dayjs(deliveryDate).format('dddd, MMMM D')}
-                  </p>
-                  <div className="checkout-product-container-row2">
-                    <div className="checkout-product-container-row2-column1">
-                      <div className="checkout-product-container-row2-column1-img-div">
-                        <img src={CartItem.product.image} />
-                      </div>
-                      <div className="checkout-product-container-row2-column1-column2">
-                        <p className="checkout-product-container-row2-column1-column2-p1">
-                          {CartItem.product.name}
-                        </p>
-                        <p className="checkout-product-container-row2-column1-column2-p2">
-                          ${(CartItem.product.priceCents / 100).toFixed(2)}
-                        </p>
-                        <p className="checkout-product-container-row2-column1-column2-p3">
-                          Quantity:
-                          <span
-                            className="js-product-Quantity"
-                            data-product-id="${productItems.id}"
-                          >
-                            {Update === 'update' ? (
-                              CartItem.quantity
-                            ) : (
-                              <label>
-                                <input
-                                  onChange={(event) => {
-                                    setInputQuantity(
-                                      Number(event.target.value)
-                                    );
-                                  }}
-                                  className="product-Quantity-label js-product-Quantity-label"
-                                  value={InputQuantity}
-                                  type="number"
-                                  min="1"
-                                />
-                              </label>
-                            )}
-                          </span>
-                          <span
-                            className="lnk js-cart-Update-lnk"
-                            onClick={async () => {
-                              if (Update === 'update') {
-                                setUpdate('Save');
-                              } else if (Update === 'Save') {
-                                await axios.put(
-                                  `http://localhost:3000/api/cart-items/${CartItem.productId}`,
-                                  {
-                                    quantity: InputQuantity,
-                                  }
-                                );
-                                await LoadCart();
-                                setUpdate('update');
-                              }
-                            }}
-                          >
-                            {Update === 'update' ? 'Update' : 'Save'}
-                          </span>
-                          <span
-                            onClick={async () => {
-                              await axios.delete(
-                                `http://localhost:3000/api/cart-items/${CartItem.productId}`
-                              );
-                              await LoadCart();
-                            }}
-                            className="lnk js-cart-delete-lnk"
-                          >
-                            Delete
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                    <div className="checkout-product-container-row2-column2">
-                      <p className="checkout-product-container-row2-column1-p1">
-                        Choose a delivery option:
-                      </p>
-                      <DeliveryOptions
-                        LoadCart={LoadCart}
-                        CartItem={CartItem}
-                        Deliveryoptions={Deliveryoptions}
-                      />
-                    </div>
-                  </div>
+          {cartIsLoaded.current === 'done' && CartItems.length === 0 ? (
+            <>
+              <div>
+                <p className="empty-cart-message">Your cart is empty</p>
+                <a href="./">
+                  <button className="View-product-btn">View product</button>
+                </a>
+              </div>
+              <div className="checkoutPlaceorder-container">
+                <p className="checkoutPlaceorder-container-p1">Order Summary</p>
+                <div className="checkoutPlaceorder-container-div1">
+                  <p>Items (0):</p>
+                  <p>$0.00</p>
                 </div>
-              );
-            })}
-          </div>
-          <PaymentSummary CartItems={CartItems} />
+                <div className="checkoutPlaceorder-container-div2">
+                  <p>Shipping & handling:</p>
+                  <p>$0.00</p>
+                </div>
+                <hr className="checkoutPlaceorder-container-hr1" />
+                <div className="checkoutPlaceorder-container-div3">
+                  <p>Total before tax:</p>
+                  <p>$0.00</p>
+                </div>
+                <div className="checkoutPlaceorder-container-div4">
+                  <p>Estimated tax (10%):</p>
+                  <p>$0.00</p>
+                </div>
+                <div className="checkoutPlaceorder-container-div5">
+                  <p>Order total:</p>
+                  <p>$0.00</p>
+                </div>
+                <div className="checkoutPlaceorder-container-disabledbutton-div">
+                  <button className="checkoutPlaceorder-container-disabledbutton">
+                    Place your order
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="Products-parent-div">
+                {CartItems.map((CartItem) => {
+                  const deliveryDate = Deliveryoptions.find(
+                    (Deliveryoption) => {
+                      return Deliveryoption.id === CartItem.deliveryOptionId;
+                    }
+                  )?.estimatedDeliveryTimeMs;
+                  return (
+                    <CartProduct
+                      key={CartItem.productId}
+                      deliveryDate={deliveryDate}
+                      CartItem={CartItem}
+                      LoadCart={LoadCart}
+                      Deliveryoptions={Deliveryoptions}
+                    />
+                  );
+                })}
+              </div>
+              <PaymentSummary CartItems={CartItems} />
+            </>
+          )}
         </div>
       </main>
+
+      <Reset LoadCart={LoadCart} />
     </>
   );
 }

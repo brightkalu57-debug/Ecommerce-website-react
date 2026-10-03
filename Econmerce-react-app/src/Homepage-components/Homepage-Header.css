@@ -44,11 +44,14 @@ body {
     border-bottom-left-radius: 5px;
     font-size: 16px;
 }
-.header-column2 button{
+.js-header-column2-button {
     height: auto;
     width: 50px;
     border: none;
+    display: flex;
     background-color: rgb(186, 255, 190);
+    align-items: center;
+    justify-content: center;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     cursor: pointer;

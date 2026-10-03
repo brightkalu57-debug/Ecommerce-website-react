@@ -41,9 +41,14 @@ export function PaymentSummary(CartItems) {
         <p>Order total:</p>
         <p>${(Paymentsummary.totalCostCents / 100).toFixed(2)}</p>
       </div>
-      <a href="../Amazon html/Amazon-placedorder.html">
+      <a href="./Orders">
         <div className="checkoutPlaceorder-container-abledbutton-div">
-          <button className="checkoutPlaceorder-container-button js-checkoutPlaceorder-container-button">
+          <button
+            className="checkoutPlaceorder-container-button"
+            onClick={() => {
+              axios.post('http://localhost:3000/api/orders');
+            }}
+          >
             Place your order
           </button>
         </div>

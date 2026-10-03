@@ -1,15 +1,7 @@
 {
-  "folders": [
-    {
-      "name": "react-course",
-      "path": "../../.."
-    },
-    {
-      "name": "Amazon project",
-      "path": "../../../../Bright html/Amazon project"
-    }
-  ],
-  "settings": {
-    "liveServer.settings.multiRootWorkspaceName": "Amazon project"
-  }
+    "folders": [
+        {
+            "path": "../../.."
+        }
+    ]
 }

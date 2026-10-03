@@ -81,8 +81,8 @@
     padding: 10px 0px;
     border-radius: 7px;
 }
-.main-addcartbtn-div:hover{
-    background-color: rgb(243, 207, 2);
+.main-addcartbtn-div:hover{   
+    background-color: rgba(25, 135, 84, 0.75);
 }
 
 
